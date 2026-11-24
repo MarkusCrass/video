@@ -15,6 +15,8 @@ from studio.ui.common import duration_of, fmt_bytes, save_bytes_once
 log = logging.getLogger("studio.ui.editor")
 
 VIDEO_TYPES = ["mp4", "mov", "m4v"]
+ORIG_VOLUME_DEFAULT = 100       # % original video sound without voiceover
+ORIG_VOLUME_WITH_VOICE = 10     # % original video sound when a voiceover is attached
 AUDIO_TYPES = ["mp3", "m4a", "wav", "ogg"]
 
 
@@ -108,8 +110,8 @@ def _mix_controls(has_voice: bool) -> tuple[Path | None, float, float, float]:
     if has_voice:
         c1.slider("Музыка под голосом (авто-приглушение)", 12, 15, key="ed_duck", format="%d%%",
                   help="Во время озвучки музыка автоматически приглушается до 12–15 %.")
-        c2.slider("Звук видео (оригинал)", 0, 100, key="ed_orig", format="%d%%",
-                  help="Обычно при озвучке оставляют 0–20 %, чтобы голос не конкурировал со звуком.")
+        c2.slider("Звук видео (оригинал)", 0, 100, key="ed_orig_voice", format="%d%%",
+                  help="По умолчанию 10 %, чтобы голос не конкурировал со звуком видео. Поднимите при необходимости.")
         music_vol = 0.0
         duck = st.session_state["ed_duck"] / 100
     else:
@@ -117,15 +119,17 @@ def _mix_controls(has_voice: bool) -> tuple[Path | None, float, float, float]:
         c2.slider("Громкость звука видео", 0, 100, key="ed_orig", format="%d%%")
         music_vol = st.session_state["ed_music_vol"] / 100
         duck = config.DUCK_VOLUME
+    orig_key = "ed_orig_voice" if has_voice else "ed_orig"
     chosen = None if st.session_state["ed_music"] == music.MUSIC_NONE else config.MUSIC_DIR / st.session_state["ed_music"]
-    return chosen, music_vol, duck, st.session_state["ed_orig"] / 100
+    return chosen, music_vol, duck, st.session_state[orig_key] / 100
 
 
 def _ensure_defaults() -> None:
     defaults = {
         "ed_mode": "gen", "ed_top": "", "ed_center": "", "ed_bottom": "",
         "ed_style": "white", "ed_size": "M", "ed_music": music.MUSIC_NONE,
-        "ed_music_vol": 30, "ed_duck": 13, "ed_orig": 100, "ed_framing": config.FRAMING_BLUR,
+        "ed_music_vol": 30, "ed_duck": 13, "ed_orig": ORIG_VOLUME_DEFAULT,
+        "ed_orig_voice": ORIG_VOLUME_WITH_VOICE, "ed_framing": config.FRAMING_BLUR,
         "ed_soft": False, "ed_result": None,
     }
     for key, value in defaults.items():

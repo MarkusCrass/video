@@ -83,6 +83,15 @@ class AppTests(unittest.TestCase):
         self.assertFalse((config.MUSIC_DIR / "ui_test_track.mp3").exists())
         self.assertFalse(at.exception)
 
+    def test_original_sound_default_with_voiceover_is_10_percent(self):
+        from studio.ui import editor
+
+        self.assertEqual(editor.ORIG_VOLUME_WITH_VOICE, 10)
+        self.assertEqual(editor.ORIG_VOLUME_DEFAULT, 100)
+        at = _login(AppTest.from_file(APP, default_timeout=120).run())
+        self.assertEqual(at.session_state["ed_orig_voice"], 10)
+        self.assertEqual(at.session_state["ed_orig"], 100)
+
     def test_logout_returns_to_login(self):
         at = _login(AppTest.from_file(APP, default_timeout=120).run())
         next(b for b in at.button if "Выйти" in b.label).click().run()
