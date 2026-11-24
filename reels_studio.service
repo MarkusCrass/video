@@ -1,0 +1,27 @@
+# systemd unit for Reels & Shorts Studio (Ubuntu VPS, 24/7).
+# Install:
+#   sudo cp reels_studio.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now reels_studio
+# Logs:   journalctl -u reels_studio -f
+# Adjust User=, paths and the port (must match PORT in .env) if needed.
+
+[Unit]
+Description=Reels & Shorts Studio (Streamlit)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/reels_studio
+EnvironmentFile=-/opt/reels_studio/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/reels_studio/.venv/bin/streamlit run app.py --server.address=0.0.0.0 --server.port=8501 --server.maxUploadSize=500 --server.headless=true --browser.gatherUsageStats=false
+Restart=always
+RestartSec=5
+# Temp sources are cleaned by the app; keep the unit from hanging on shutdown.
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

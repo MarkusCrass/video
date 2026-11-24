@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Secrets
+.env
+
+# Studio runtime data (large, generated)
+output/
+tmp/
+music/*.mp3
+music/*.wav
+!music/.gitkeep
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
